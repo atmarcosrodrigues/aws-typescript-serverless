@@ -7,7 +7,15 @@ class ProductService {
     private readonly tableName: string
   ) {}
 
+  async getAllProduct(): Promise<Product[]> {
+    const result = await this.docClient
+      .scan({
+        TableName: this.tableName,
+      })
+      .promise();
 
+    return result.Items as Product[];
+  }
 
   async createProduct(product: Product): Promise<Product> {
     await this.docClient
