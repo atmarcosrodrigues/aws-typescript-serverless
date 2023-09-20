@@ -16,6 +16,17 @@ class ProductService {
 
     return result.Items as Product[];
   }
+  
+  async getPost(productId: string): Promise<Product> {
+    const result = await this.docClient
+      .get({
+        TableName: this.tableName,
+        Key: { productId },
+      })
+      .promise();
+
+    return result.Item as Product;
+  }
 
   async createProduct(product: Product): Promise<Product> {
     await this.docClient
