@@ -5,7 +5,7 @@ Serverless API with AWS Lambd
 
 
 ## Technologies
-    * [Node.js]https://nodejs.org/)
+    * [Node.js](https://nodejs.org/)
 	* [AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/lambda-typescript.html)
 
 ## Installation / Usage
