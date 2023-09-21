@@ -1,8 +1,8 @@
 import createDynamoDBClient from "../db";
 import ProductService from "./productService";
 
-const { PRODUCT_TABLE } = process.env;
+const { PRODUCTS_TABLE } = process.env;
 
-const productService = new ProductService(createDynamoDBClient(), PRODUCT_TABLE);
+const productService = new ProductService(createDynamoDBClient(), PRODUCTS_TABLE);
 
 export default productService;
