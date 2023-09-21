@@ -1,0 +1,94 @@
+service:
+  name: aws-serverless-api
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  serverless-offline:
+    httpPort: 3003
+  dynamodb:
+    start:
+      port: 5000
+      inMemory: true
+      migrate: true
+    stages:
+      - dev
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-2'}
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    PRODUCTS_TABLE: Products-${self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}"
+
+functions:
+  createProduct:
+    handler: src/functions/createProduct.handler
+    events:
+      - http:
+          method: post
+          path: create-product
+          cors: true
+  getAllProducts:
+    handler: src/functions/getAllProducts.handler
+    events:
+      - http:
+          method: get
+          path: get-product
+          cors: true
+  getProduct:
+    handler: src/functions/getProduct.handler
+    events:
+      - http:
+          method: get
+          path: get-product/{productId}
+          cors: true
+  updateProduct:
+    handler: src/functions/updateProduct.handler
+    events:
+      - http:
+          method: put
+          path: update-product/{productId}
+          cors: true
+  deleteProduct:
+    handler: src/functions/deleteProduct.handler
+    events:
+      - http:
+          method: delete
+          path: delete-product/{productId}
+          cors: true
+
+resources:
+  Resources:
+    ProductsListTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.PRODUCTS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: productId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: productId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

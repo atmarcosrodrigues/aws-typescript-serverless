@@ -7,7 +7,7 @@ class ProductService {
     private readonly tableName: string
   ) {}
 
-  async getAllProduct(): Promise<Product[]> {
+  async getAllProducts(): Promise<Product[]> {
     const result = await this.docClient
       .scan({
         TableName: this.tableName,
@@ -17,7 +17,7 @@ class ProductService {
     return result.Items as Product[];
   }
   
-  async getPost(productId: string): Promise<Product> {
+  async getProduct(productId: string): Promise<Product> {
     const result = await this.docClient
       .get({
         TableName: this.tableName,
@@ -39,6 +39,35 @@ class ProductService {
     return product;
   }
 
+  async updateProduct(ProductId: string, partialProduct: Partial<Product>): Promise<Product> {
+    const updated = await this.docClient
+      .update({
+        TableName: this.tableName,
+        Key: { ProductId },
+        UpdateExpression:
+          "set #title = :title, description = :description, active = :active",
+        ExpressionAttributeNames: {
+          "#title": "title",
+        },
+        ExpressionAttributeValues: {
+          ":title": partialProduct.title,
+          ":description": partialProduct.description,
+          ":active": partialProduct.active,
+        },
+        ReturnValues: "ALL_NEW",
+      })
+      .promise();
+
+    return updated.Attributes as Product;
+  }
+  async deleteProduct(productId: string) {
+    return this.docClient
+      .delete({
+        TableName: this.tableName,
+        Key: { productId },
+      })
+      .promise();
+  }
 
 }
 
